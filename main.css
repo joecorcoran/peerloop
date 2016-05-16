@@ -19,7 +19,7 @@ body {
 
 .setup {
   display: inline-flex;
-  flex: 1 0 auto;
+  flex: 1 1 auto;
   flex-flow: row nowrap;
 }
 
@@ -37,7 +37,7 @@ h1 {
 }
 
 .chat-log {
-  flex: 40 0 auto;
+  flex: 100 1 auto;
   word-wrap: break-word;
 }
 
@@ -47,13 +47,15 @@ h1 {
 
 .bottom, .bottom form {
   display: inline-flex;
-  flex: 1 0 auto;
+  flex: 1 1 auto;
   flex-flow: row nowrap;
 }
 
 .text-field {
   display: inline-flex;
   flex: 20 0 auto;
+  font-family: monospace;
+  font-size: 14px;
 }
 
 .send-btn {
@@ -67,6 +69,10 @@ h1 {
   font-family: monospace;
   color: white;
   cursor: pointer;
+}
+
+.btn:hover {
+  text-decoration: underline;
 }
 
 .btn-right {
@@ -89,6 +95,10 @@ h1 {
   background: #222;
 }
 
-.btn[disabled="disabled"] {
+.btn[disabled] {
   background: #CCC;
+}
+
+.btn[disabled]:hover {
+  text-decoration: none;
 }

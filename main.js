@@ -1,158 +1,196 @@
-var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+(function(window, document) {
+  'use strict';
 
-var ChatLog = function(container) {
-  this.container = document.getElementById(container);
-};
+  var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
 
-ChatLog.prototype.printLine = function(text) {
-  var textNode = document.createTextNode(text),
-      line = document.createElement('p');
-  line.appendChild(textNode);
-  this.container.appendChild(line);
-};
+  var ChatClient = function(log) {
+    var config = { iceServers: [{ url: 'stun:stun.stunprotocol.org' }] },
+        connection = { optional: [{'DtlsSrtpKeyAgreement': true}] };
 
-ChatLog.prototype.printMessage = function(data) {
-  var uidNode = document.createTextNode(data.uid),
-      msgNode = document.createTextNode(' ' + data.message),
-      span = document.createElement('span'),
-      line = document.createElement('p');
-  span.style.color = '#' + data.uid;
-  span.appendChild(uidNode);
-  line.appendChild(span);
-  line.appendChild(msgNode);
-  this.container.appendChild(line);
-};
+    this.log = log;
+    this.conn = new RTCPeerConnection(config, connection);
+    this.channel = null;
+    this.uid = Math.floor(Math.random()*16777215).toString(16);
 
-var ChatClient = function(log) {
-  var config = { iceServers: [{ url: 'stun:stun.stunprotocol.org' }] },
-      connection = { optional: [{'DtlsSrtpKeyAgreement': true}] };
+    this.initConn();
+  };
 
-  this.log = log;
-  this.conn = new RTCPeerConnection(config, connection);
-  this.channel = null;
-  this.uid = Math.floor(Math.random()*16777215).toString(16);
+  ChatClient.prototype.initConn = function() {
+    this.conn.onicecandidate = function (e) {
+      if (e.candidate == null && this.conn.localDescription.type == 'offer') {
+        var offer = JSON.stringify(this.conn.localDescription);
+        console.log('Offer', offer);
+        this.log.printLine('Done! Send this code to a friend::');
+        this.log.printLine(btoa(offer));
+      }
+    }.bind(this);
 
-  this.initConn();
-};
+    this.conn.ondatachannel = function(e) {
+      this.channel = e.channel || e;
+      this.setupChannel();
+    }.bind(this);
 
-ChatClient.prototype.initConn = function() {
-  this.conn.onicecandidate = function (e) {
-    if (e.candidate == null && this.conn.localDescription.type == 'offer') {
-      var offer = JSON.stringify(this.conn.localDescription);
-      console.log('Offer', offer);
-      this.log.printLine('Send this to someone you know:');
-      this.log.printLine(btoa(offer));
+    this.conn.onconnection = console.info.bind(console);
+    this.conn.onsignalingstatechange = console.info.bind(console);
+    this.conn.oniceconnectionstatechange = console.info.bind(console);
+    this.conn.onicegatheringstatechange = console.info.bind(console);
+  };
+
+  ChatClient.prototype.createChannel = function() {
+    try {
+      this.channel = this.conn.createDataChannel('test', { reliable: true });
+      this.setupChannel();
+    } catch (e) {
+      console.warn('Could not create data channel', e);
     }
-  }.bind(this);
+  };
 
-  this.conn.ondatachannel = function(e) {
-    this.channel = e.channel || e;
-    this.setupChannel();
-  }.bind(this);
+  ChatClient.prototype.setupChannel = function() {
+    this.channel.onopen = function (e) {
+      console.log('Data channel open');
+      document.dispatchEvent(new Event('chatready'));
+    }.bind(this);
+    this.channel.onmessage = function (e) {
+      if (e.data.charCodeAt(0) == 2) { return }
+      var data = JSON.parse(e.data);
+      console.log(data);
+      document.dispatchEvent(new CustomEvent('chatmessage', { detail: data }));
+    }.bind(this);
+  };
 
-  this.conn.onconnection = console.info.bind(console);
-  this.conn.onsignalingstatechange = console.info.bind(console);
-  this.conn.oniceconnectionstatechange = console.info.bind(console);
-  this.conn.onicegatheringstatechange = console.info.bind(console);
-};
+  ChatClient.prototype.offer = function() {
+    this.conn.createOffer(
+      function (offer) {
+        this.conn.setLocalDescription(offer, function () {}, function () {});
+        console.log('Created local offer', offer);
+      }.bind(this),
+      function () {
+        console.warn('Could not create offer');
+      }.bind(this),
+      { optional: [], mandatory: {} }
+    );
+  };
 
-ChatClient.prototype.createChannel = function() {
-  try {
-    this.channel = this.conn.createDataChannel('test', { reliable: true });
-    this.setupChannel();
-  } catch (e) {
-    console.warn('Could not create data channel', e);
-  }
-};
+  ChatClient.prototype.answer = function(offer) {
+    var offer = atob(offer);
+    this.conn.setRemoteDescription(JSON.parse(offer));
+    this.conn.createAnswer(
+      function (answer) {
+        this.conn.setLocalDescription(answer);
 
-ChatClient.prototype.setupChannel = function() {
-  this.channel.onopen = function (e) {
-    console.log('Data channel open');
-    document.dispatchEvent(new Event('chatready'));
-  }.bind(this);
-  this.channel.onmessage = function (e) {
-    if (e.data.charCodeAt(0) == 2) { return }
-    var data = JSON.parse(e.data);
-    console.log(data);
-    this.log.printMessage(data);
-  }.bind(this);
-};
+        var answer = JSON.stringify(answer);
+        console.log('Created local answer', answer);
+        this.log.printLine('Thanks! Send this confirmation code back to the person who invited you:');
+        this.log.printLine(btoa(answer));
+      }.bind(this),
+      function () {
+        console.warn('Could not create answer');
+      }.bind(this),
+      { optional: [], mandatory: {} }
+    );
+  };
 
-ChatClient.prototype.offer = function() {
-  this.conn.createOffer(
-    function (offer) {
-      this.conn.setLocalDescription(offer, function () {}, function () {});
-      console.log('Created local offer', offer);
-    }.bind(this),
-    function () {
-      console.warn('Could not create offer');
-    }.bind(this),
-    { optional: [], mandatory: {} }
-  );
-};
+  ChatClient.prototype.connect = function(answer) {
+    var answer = atob(answer);
+    this.conn.setRemoteDescription(JSON.parse(answer)); 
+  };
 
-ChatClient.prototype.answer = function(offer) {
-  var offer = atob(offer);
-  this.conn.setRemoteDescription(JSON.parse(offer));
-  this.conn.createAnswer(
-    function (answer) {
-      this.conn.setLocalDescription(answer);
+  ChatClient.prototype.sendMessage = function(msg) {
+    var data = { uid: this.uid, message: msg };
+    this.channel.send(JSON.stringify(data));
+    document.dispatchEvent(new CustomEvent('chatmessage', { detail: data }));
+  };
 
-      var answer = JSON.stringify(answer);
-      console.log('Created local answer', answer);
-      this.log.printLine('Thanks! Send this confirmation code back to the person who invited you:');
-      this.log.printLine(btoa(answer));
-    }.bind(this),
-    function () {
-      console.warn('Could not create answer');
-    }.bind(this),
-    { optional: [], mandatory: {} }
-  );
-};
+  var ChatLog = function(container) {
+    this.container = document.getElementById(container);
+  };
 
-ChatClient.prototype.connect = function(answer) {
-  var answer = atob(answer);
-  this.conn.setRemoteDescription(JSON.parse(answer)); 
-};
+  ChatLog.prototype.printLine = function(text) {
+    var textNode = document.createTextNode(text),
+        line = document.createElement('p');
+    line.appendChild(textNode);
+    this.container.appendChild(line);
+  };
 
-ChatClient.prototype.sendMessage = function(msg) {
-  var data = { uid: this.uid, message: msg };
-  this.channel.send(JSON.stringify(data));
-  this.log.printMessage(data);
-};
+  ChatLog.prototype.printMessage = function(data) {
+    var uidNode = document.createTextNode(data.uid),
+        msgNode = document.createTextNode(' ' + data.message),
+        span = document.createElement('span'),
+        line = document.createElement('p');
+    span.style.color = '#' + data.uid;
+    span.appendChild(uidNode);
+    line.appendChild(span);
+    line.appendChild(msgNode);
+    this.container.appendChild(line);
+  };
 
-// Move this into better structure
-var log = new ChatLog('chat');
-var client = new ChatClient(log);
+  var log = new ChatLog('chat'),
+      client = new ChatClient(log);
 
-document.getElementById('invite').addEventListener('click', function() {
-  log.printLine('Creating channel and generating invitation code...');
-  client.createChannel();
-  client.offer();
-});
+  var inviteBtn = document.getElementById('invite'),
+      acceptBtn = document.getElementById('accept'),
+      confirmBtn = document.getElementById('confirm'),
+      messageForm = document.getElementById('message');
 
-document.getElementById('accept').addEventListener('click', function() {
-  var offer = prompt('Paste invitation code');
-  client.answer(offer);
-});
+  inviteBtn.addEventListener('click', function() {
+    log.printLine('Creating channel and generating invitation code...');
+    client.createChannel();
+    client.offer();
+    console.log(inviteBtn);
+    document.dispatchEvent(new Event('chatinvited'));
+  }, false);
 
-document.getElementById('confirm').addEventListener('click', function() {
-  var answer = prompt('Paste confirmation code');
-  log.printLine('Waiting for connection...');
-  client.connect(answer);
-});
+  acceptBtn.addEventListener('click', function() {
+    var offer = prompt('Did someone send you an invitation code? Paste it here...');
+    client.answer(offer);
+    document.dispatchEvent(new Event('chataccepted'));
+  }, false);
 
-document.addEventListener('chatready', function() {
-  log.printLine('Connection ready. Time to chat!');
-  var elements = document.getElementsByClassName('chatready');
-  Array.prototype.forEach.call(elements, function(element) {
-    element.disabled = false;
-  });
-});
+  confirmBtn.addEventListener('click', function() {
+    var answer = prompt('Did you receive a confirmation code back? Paste it here...');
+    log.printLine('Waiting for connection...');
+    client.connect(answer);
+    document.dispatchEvent(new Event('chatconfirmed'));
+  }, false);
 
-document.getElementById('message').addEventListener('submit', function(e) {
-  e.preventDefault();
-  var txt = document.getElementById('message-text');
-  client.sendMessage(txt.value);
-  txt.value = '';
-}, false);
+  messageForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var txt = document.getElementById('message-text');
+    client.sendMessage(txt.value);
+    txt.value = '';
+  }, false);
+
+  document.addEventListener('chatready', function() {
+    log.printLine('Peer-to-peer connection established. Time to chat!');
+    var elements = document.getElementsByClassName('chatready');
+    Array.prototype.forEach.call(elements, function(element) {
+      element.disabled = false;
+    });
+  }, false);
+
+  document.addEventListener('chatinvited', function() {
+    inviteBtn.disabled = true;
+    acceptBtn.disabled = true;
+    confirmBtn.disabled = false;
+  }, false);
+  
+  document.addEventListener('chataccepted', function() {
+    inviteBtn.disabled = true;
+    acceptBtn.disabled = true;
+    confirmBtn.disabled = true;
+  }, false);
+
+  document.addEventListener('chatconfirmed', function() {
+    inviteBtn.disabled = true;
+    acceptBtn.disabled = true;
+    confirmBtn.disabled = true;
+  }, false);
+
+  document.addEventListener('chatmessage', function(event) {
+    log.printMessage(event.detail);
+    window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
+  }, false);
+
+  log.printLine('Welcome. Do you want to invite someone to chat, or accept an invitation?');
+
+})(window, document);
