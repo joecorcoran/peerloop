@@ -173,7 +173,6 @@
     Array.prototype.forEach.call(elements, function(element) {
       element.disabled = false;
     });
-    document.getElementById('message-text').dispatchEvent('focus');
   }, false);
 
   document.addEventListener('chatinvited', function() {
@@ -199,6 +198,6 @@
     window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
   }, false);
 
-  log.printLine('Welcome. Do you want to invite someone to chat, or accept an invitation?');
+  log.printLine('Welcome. This is experimental, peer-to-peer chat software. Do you want to invite someone to chat, or accept an invitation?');
 
 })(window, document);
