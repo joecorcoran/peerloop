@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="main.css"> 
+  </head>
+  <body>
+    <div class="setup">
+      <button onclick="offer()" class="btn btn-green">Start new chat</button>
+      <button onclick="connect()" class="btn btn-green-2">Enter response</button>
+      <button onclick="answer()" class="btn btn-blue btn-right">Join existing chat</button>
+    </div>
+    <div id="chat" class="chat-log"></div>
+    <textarea id="message"></textarea>
+    <button onclick="sendMessage()" class="btn btn-black btn-right">Send</button>
+    <script src="client.js"></script>
+  </body>
+</html>
