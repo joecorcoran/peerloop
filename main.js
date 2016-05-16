@@ -1,6 +1,12 @@
 (function(window, document) {
   'use strict';
 
+  var moz = function() {
+    return window.hasOwnProperty('mozPaintCount');
+  };
+
+  var sessionConstraints = moz() ? { offerToReceiveAudio: false, offerToReceiveVideo: false } : {};
+
   var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
 
   var ChatClient = function(log) {
@@ -67,13 +73,14 @@
       function () {
         console.warn('Could not create offer');
       }.bind(this),
-      { optional: [], mandatory: {} }
+      sessionConstraints 
     );
   };
 
   ChatClient.prototype.answer = function(offer) {
     var offer = atob(offer);
-    this.conn.setRemoteDescription(JSON.parse(offer));
+    offer = moz() ? new RTCSessionDescription(JSON.parse(offer)) : JSON.parse(offer);
+    this.conn.setRemoteDescription(offer);
     this.conn.createAnswer(
       function (answer) {
         this.conn.setLocalDescription(answer);
@@ -86,13 +93,14 @@
       function () {
         console.warn('Could not create answer');
       }.bind(this),
-      { optional: [], mandatory: {} }
+      sessionConstraints 
     );
   };
 
   ChatClient.prototype.connect = function(answer) {
     var answer = atob(answer);
-    this.conn.setRemoteDescription(JSON.parse(answer)); 
+    answer = moz() ? new RTCSessionDescription(JSON.parse(answer)) : JSON.parse(answer);
+    this.conn.setRemoteDescription(answer); 
   };
 
   ChatClient.prototype.sendMessage = function(msg) {
@@ -136,7 +144,6 @@
     log.printLine('Creating channel and generating invitation code...');
     client.createChannel();
     client.offer();
-    console.log(inviteBtn);
     document.dispatchEvent(new Event('chatinvited'));
   }, false);
 
