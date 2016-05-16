@@ -10,7 +10,7 @@
   var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
 
   var ChatClient = function(log) {
-    var config = { iceServers: [{ url: 'stun:stun.stunprotocol.org' }] },
+    var config = { iceServers: [{ url: 'stun:stun.services.mozilla.com' }] },
         connection = { optional: [{'DtlsSrtpKeyAgreement': true}] };
 
     this.log = log;
@@ -173,6 +173,7 @@
     Array.prototype.forEach.call(elements, function(element) {
       element.disabled = false;
     });
+    document.getElementById('message-text').dispatchEvent('focus');
   }, false);
 
   document.addEventListener('chatinvited', function() {
