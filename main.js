@@ -20,7 +20,7 @@
       if (e.candidate == null && this.conn.localDescription.type == 'offer') {
         var offer = JSON.stringify(this.conn.localDescription);
         console.log('Offer', offer);
-        this.log.printLine('Done! Send this code to a friend::');
+        this.log.printLine('Done! Send this code to a friend:');
         this.log.printLine(btoa(offer));
       }
     }.bind(this);
