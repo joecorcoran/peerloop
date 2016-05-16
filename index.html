@@ -5,13 +5,18 @@
   </head>
   <body>
     <div class="setup">
-      <button onclick="offer()" class="btn btn-green">Start new chat</button>
-      <button onclick="connect()" class="btn btn-green-2">Enter response</button>
-      <button onclick="answer()" class="btn btn-blue btn-right">Join existing chat</button>
+      <h1>peerloop</h1>
+      <button id="invite" class="btn btn-green">Invite</button>
+      <button id="confirm"  class="btn btn-green-2">Enter confirmation</button>
+      <button id="accept" class="btn btn-blue btn-right">Accept invitation</button>
     </div>
     <div id="chat" class="chat-log"></div>
-    <textarea id="message"></textarea>
-    <button onclick="sendMessage()" class="btn btn-black btn-right">Send</button>
+    <div class="bottom">
+      <form id="message">
+        <input type="text" class="text-field chatready" disabled="disabled" id="message-text">
+        <button class="btn btn-black btn-right send-btn chatready" disabled="disabled">Send</button>
+      </form>
+    </div>
     <script src="client.js"></script>
   </body>
 </html>

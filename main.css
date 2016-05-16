@@ -1,17 +1,64 @@
+* {
+  box-sizing: border-box;
+}
+
 html {
   font-size: 14px;
   font-family: monospace;
   color: #333;
-  margin: 40px;
-  box-sizing: border-box;
+  height: 100%;
 }
 
 body {
-  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  min-height: 100vh;
+  flex-flow: column nowrap;
+  margin: 0;
 }
 
 .setup {
-  margin-bottom: 10px;
+  display: inline-flex;
+  flex: 1 0 auto;
+  flex-flow: row nowrap;
+}
+
+h1 {
+  margin: 0;
+  font-size: 20px;
+  display: inline-flex;
+  flex: 40 0 auto;
+}
+
+.setup button {
+  display: inline-flex;
+  flex: 0 1 auto;
+  text-align: center;
+}
+
+.chat-log {
+  flex: 40 0 auto;
+  word-wrap: break-word;
+}
+
+.chat-log span {
+  color: #444;
+}
+
+.bottom, .bottom form {
+  display: inline-flex;
+  flex: 1 0 auto;
+  flex-flow: row nowrap;
+}
+
+.text-field {
+  display: inline-flex;
+  flex: 20 0 auto;
+}
+
+.send-btn {
+  display: inline-flex;
+  flex: 0 1 auto;
 }
 
 .btn {
@@ -42,15 +89,6 @@ body {
   background: #222;
 }
 
-.chat-log {
-  overflow-x: hidden;
-}
-
-textarea {
-  box-sizing: border-box;
-  padding: 10px;
-  width: 100%;
-  min-height: 80px;
-  font-family: monospace;
-  margin-bottom: 10px;
+.btn[disabled="disabled"] {
+  background: #CCC;
 }
