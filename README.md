@@ -1,5 +1,5 @@
 ```
-git clone git@github.com:joecorcoran/webrtc-chat.git
+git clone git@github.com:joecorcoran/peerloop.git
 cd webrtc-chat
 ruby -run -ehttpd . -p8000
 ```
