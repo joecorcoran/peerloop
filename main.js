@@ -181,6 +181,7 @@
     Array.prototype.forEach.call(elements, function(element) {
       element.disabled = false;
     });
+    document.getElementById('message-text').focus();
   }, false);
 
   document.addEventListener('chatinvited', function() {
@@ -206,6 +207,8 @@
     window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
   }, false);
 
-  log.printLine('Welcome. This is experimental, peer-to-peer chat software. Do you want to invite someone to chat, or accept an invitation?');
+  log.printLine('Welcome!');
+  log.printLine('This is experimental, peer-to-peer chat software.');
+  log.printLine('Do you want to invite someone to chat, or accept an invitation?');
 
 })(window, document);
