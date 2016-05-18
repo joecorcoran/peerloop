@@ -22,12 +22,11 @@
   };
 
   ChatClient.prototype.initConn = function() {
-    this.conn.onicecandidate = function (e) {
-      if (e.candidate == null && this.conn.localDescription.type == 'offer') {
-        var offer = JSON.stringify(this.conn.localDescription);
-        console.log('Offer', offer);
-        this.log.printLine('Done! Send this code to a friend:');
-        this.log.printLine(btoa(offer));
+    this.conn.onicecandidate = function (event) {
+      var desc = this.conn.localDescription;
+      if (event.candidate == null && desc.type == 'offer') {
+        console.log('Offer', desc);
+        document.dispatchEvent(new CustomEvent('chatoffer', { detail: desc }));
       }
     }.bind(this);
 
@@ -56,9 +55,9 @@
       console.log('Data channel open');
       document.dispatchEvent(new Event('chatready'));
     }.bind(this);
-    this.channel.onmessage = function (e) {
-      if (e.data.charCodeAt(0) == 2) { return }
-      var data = JSON.parse(e.data);
+    this.channel.onmessage = function (event) {
+      if (event.data.charCodeAt(0) == 2) { return }
+      var data = JSON.parse(event.data);
       console.log(data);
       document.dispatchEvent(new CustomEvent('chatmessage', { detail: data }));
     }.bind(this);
@@ -67,7 +66,7 @@
   ChatClient.prototype.offer = function() {
     this.conn.createOffer(
       function (offer) {
-        this.conn.setLocalDescription(offer, function () {}, function () {});
+        this.conn.setLocalDescription(offer, function() {}, function() {});
         console.log('Created local offer', offer);
       }.bind(this),
       function () {
@@ -84,11 +83,8 @@
     this.conn.createAnswer(
       function (answer) {
         this.conn.setLocalDescription(answer);
-
-        var answer = JSON.stringify(answer);
         console.log('Created local answer', answer);
-        this.log.printLine('Thanks! Send this confirmation code back to the person who invited you:');
-        this.log.printLine(btoa(answer));
+        document.dispatchEvent(new CustomEvent('chatanswer', { detail: answer }));
       }.bind(this),
       function () {
         console.warn('Could not create answer');
@@ -160,11 +156,23 @@
     document.dispatchEvent(new Event('chatconfirmed'));
   }, false);
 
-  messageForm.addEventListener('submit', function(e) {
-    e.preventDefault();
+  messageForm.addEventListener('submit', function(event) {
+    event.preventDefault();
     var txt = document.getElementById('message-text');
     client.sendMessage(txt.value);
     txt.value = '';
+  }, false);
+
+  document.addEventListener('chatoffer', function(event) {
+    var offer = event.detail;
+    log.printLine('Done! Send this code to a friend:');
+    log.printLine(btoa(JSON.stringify(offer)));
+  }, false);
+
+  document.addEventListener('chatanswer', function(event) {
+    var answer = event.detail;
+    log.printLine('Thanks! Send this confirmation code back to the person who invited you:');
+    log.printLine(btoa(JSON.stringify(answer)));
   }, false);
 
   document.addEventListener('chatready', function() {
