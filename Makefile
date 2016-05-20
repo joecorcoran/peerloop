@@ -1,5 +1,7 @@
 all:
-	mkdir -p lib && ./node_modules/.bin/babel src -d lib
+	mkdir -p lib
+	cp node_modules/systemjs/dist/system-csp-production.js lib/system.js
+	./node_modules/.bin/babel src -d lib -s
 install:
 	npm install --save-dev
 clean:

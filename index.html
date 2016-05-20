@@ -18,6 +18,10 @@
         <button class="btn btn-black btn-right send-btn chatready" disabled>Send</button>
       </form>
     </div>
-    <script src="/lib/main.js"></script>
+    <script src="/lib/system.js"></script>
+    <script>
+      System.config({ baseURL: '/lib' });
+      System.import('main.js').then(function(main) { main.run(); });
+    </script>
   </body>
 </html>
