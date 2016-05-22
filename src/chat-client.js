@@ -24,7 +24,7 @@ export default class {
       var desc = this.conn.localDescription;
       if (event.candidate == null && desc.type == 'offer') {
         console.log('Offer', desc);
-        document.dispatchEvent(new CustomEvent('chatoffer', { detail: desc }));
+        document.dispatchEvent(new CustomEvent('peerloop:offer', { detail: desc }));
       }
     }.bind(this);
 
@@ -51,13 +51,13 @@ export default class {
   setupChannel() {
     this.channel.onopen = function (e) {
       console.log('Data channel open');
-      document.dispatchEvent(new Event('chatready'));
+      document.dispatchEvent(new Event('peerloop:channel:open'));
     }.bind(this);
     this.channel.onmessage = function (event) {
       if (event.data.charCodeAt(0) == 2) { return }
       var data = JSON.parse(event.data);
       console.log(data);
-      document.dispatchEvent(new CustomEvent('chatmessage', { detail: data }));
+      document.dispatchEvent(new CustomEvent('peerloop:message', { detail: data }));
     }.bind(this);
   }
 
@@ -82,7 +82,7 @@ export default class {
       function (answer) {
         this.conn.setLocalDescription(answer);
         console.log('Created local answer', answer);
-        document.dispatchEvent(new CustomEvent('chatanswer', { detail: answer }));
+        document.dispatchEvent(new CustomEvent('peerloop:answer', { detail: answer }));
       }.bind(this),
       function () {
         console.warn('Could not create answer');
@@ -100,6 +100,6 @@ export default class {
   sendMessage(msg) {
     const data = { uid: this.uid, message: msg };
     this.channel.send(JSON.stringify(data));
-    document.dispatchEvent(new CustomEvent('chatmessage', { detail: data }));
+    document.dispatchEvent(new CustomEvent('peerloop:message', { detail: data }));
   }
 }

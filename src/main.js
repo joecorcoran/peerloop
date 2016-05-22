@@ -14,20 +14,20 @@ export const run = function() {
     log.printLine('Creating channel and generating invitation code...');
     client.createChannel();
     client.offer();
-    document.dispatchEvent(new Event('chatinvited'));
+    document.dispatchEvent(new Event('peerloop:ui:invited'));
   }, false);
 
   acceptBtn.addEventListener('click', function() {
     const offer = prompt('Did someone send you an invitation code? Paste it here...');
     client.answer(offer);
-    document.dispatchEvent(new Event('chataccepted'));
+    document.dispatchEvent(new Event('peerloop:ui:accepted'));
   }, false);
 
   confirmBtn.addEventListener('click', function() {
     const answer = prompt('Did you receive a confirmation code back? Paste it here...');
     log.printLine('Waiting for connection...');
     client.connect(answer);
-    document.dispatchEvent(new Event('chatconfirmed'));
+    document.dispatchEvent(new Event('peerloop:ui:confirmed'));
   }, false);
 
   messageForm.addEventListener('submit', function(event) {
@@ -37,19 +37,19 @@ export const run = function() {
     txt.value = '';
   }, false);
 
-  document.addEventListener('chatoffer', function(event) {
+  document.addEventListener('peerloop:offer', function(event) {
     const offer = event.detail;
     log.printLine('Done! Send this code to a friend:');
     log.printLine(btoa(JSON.stringify(offer)));
   }, false);
 
-  document.addEventListener('chatanswer', function(event) {
+  document.addEventListener('peerloop:answer', function(event) {
     const answer = event.detail;
     log.printLine('Thanks! Send this confirmation code back to the person who invited you:');
     log.printLine(btoa(JSON.stringify(answer)));
   }, false);
 
-  document.addEventListener('chatready', function() {
+  document.addEventListener('peerloop:channel:open', function() {
     log.printLine('Peer-to-peer connection established. Time to chat!');
     const elements = document.getElementsByClassName('chatready');
     Array.prototype.forEach.call(elements, function(element) {
@@ -58,25 +58,25 @@ export const run = function() {
     document.getElementById('message-text').focus();
   }, false);
 
-  document.addEventListener('chatinvited', function() {
+  document.addEventListener('peerloop:ui:invited', function() {
     inviteBtn.disabled = true;
     acceptBtn.disabled = true;
     confirmBtn.disabled = false;
   }, false);
 
-  document.addEventListener('chataccepted', function() {
+  document.addEventListener('peerloop:ui:accepted', function() {
     inviteBtn.disabled = true;
     acceptBtn.disabled = true;
     confirmBtn.disabled = true;
   }, false);
 
-  document.addEventListener('chatconfirmed', function() {
+  document.addEventListener('peerloop:ui:confirmed', function() {
     inviteBtn.disabled = true;
     acceptBtn.disabled = true;
     confirmBtn.disabled = true;
   }, false);
 
-  document.addEventListener('chatmessage', function(event) {
+  document.addEventListener('peerloop:message', function(event) {
     log.printMessage(event.detail);
     window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
   }, false);
