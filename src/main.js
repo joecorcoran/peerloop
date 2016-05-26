@@ -1,8 +1,10 @@
 import ChatLog from 'chat-log.js';
 import ChatClient from 'chat-client.js';
+import Store from 'store.js';
 
 const log = new ChatLog('chat'),
-      client = new ChatClient(log);
+      client = new ChatClient(log),
+      store = new Store('peerloop');
 
 export const run = function() {
   const inviteBtn = document.getElementById('invite'),
@@ -78,6 +80,7 @@ export const run = function() {
 
   document.addEventListener('peerloop:message', function(event) {
     log.printMessage(event.detail);
+    store.saveMessage(event.detail.message);
     window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
   }, false);
 
