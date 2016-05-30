@@ -1,3 +1,5 @@
+import hex from 'hex.js';
+
 const RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
 
 const moz = function() {
@@ -14,7 +16,7 @@ export default class {
     this.log = log;
     this.conn = new RTCPeerConnection(config, connection);
     this.channel = null;
-    this.uid = Math.floor(Math.random()*16777215).toString(16);
+    this.uid = hex();
 
     this.initConn();
   }
@@ -57,7 +59,7 @@ export default class {
       if (event.data.charCodeAt(0) == 2) { return }
       var data = JSON.parse(event.data);
       console.log(data);
-      document.dispatchEvent(new CustomEvent('peerloop:message', { detail: data }));
+      document.dispatchEvent(new CustomEvent('peerloop:data:received', { detail: data }));
     }.bind(this);
   }
 
@@ -97,9 +99,8 @@ export default class {
     this.conn.setRemoteDescription(answer); 
   }
 
-  sendMessage(msg) {
-    const data = { uid: this.uid, message: msg };
+  send(data) {
     this.channel.send(JSON.stringify(data));
-    document.dispatchEvent(new CustomEvent('peerloop:message', { detail: data }));
+    document.dispatchEvent(new CustomEvent('peerloop:data:sent', { detail: data }));
   }
 }

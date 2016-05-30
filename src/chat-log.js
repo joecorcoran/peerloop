@@ -10,15 +10,15 @@ export default class {
     this.container.appendChild(line);
   }
 
-  printMessage(data) {
-    var uidNode = document.createTextNode(data.uid),
-        msgNode = document.createTextNode(` ${data.message}`),
+  printMessage(attrs) {
+    var clientNode = document.createTextNode(attrs.clientUid),
+        textNode = document.createTextNode(` ${attrs.text}`),
         span = document.createElement('span'),
         line = document.createElement('p');
-    span.style.color = `#${data.uid}`;
-    span.appendChild(uidNode);
+    span.style.color = `#${attrs.clientUid}`;
+    span.appendChild(clientNode);
     line.appendChild(span);
-    line.appendChild(msgNode);
+    line.appendChild(textNode);
     this.container.appendChild(line);
   }
 }

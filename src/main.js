@@ -1,10 +1,10 @@
 import ChatLog from 'chat-log.js';
 import ChatClient from 'chat-client.js';
-import Store from 'store.js';
+import Message from 'message.js';
 
 const log = new ChatLog('chat'),
       client = new ChatClient(log),
-      store = new Store('peerloop');
+      store = new Message.Store(client.uid);
 
 export const run = function() {
   const inviteBtn = document.getElementById('invite'),
@@ -34,9 +34,14 @@ export const run = function() {
 
   messageForm.addEventListener('submit', function(event) {
     event.preventDefault();
-    const txt = document.getElementById('message-text');
-    client.sendMessage(txt.value);
-    txt.value = '';
+    const text = document.getElementById('message-text');
+    const message = new Message.Model(client.uid, text.value);
+    client.send(message.serialized);
+    store.save(message, () => {
+      log.printMessage(message.serialized);
+      window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
+    });
+    text.value = '';
   }, false);
 
   document.addEventListener('peerloop:offer', function(event) {
@@ -78,10 +83,12 @@ export const run = function() {
     confirmBtn.disabled = true;
   }, false);
 
-  document.addEventListener('peerloop:message', function(event) {
-    log.printMessage(event.detail);
-    store.saveMessage(event.detail.message);
-    window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
+  document.addEventListener('peerloop:data:received', function(event) {
+    let message = Message.Model.parse(event.detail);
+    store.save(message, () => {
+      log.printMessage(event.detail);
+      window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
+    });
   }, false);
 
   log.printLine('Welcome!');
