@@ -1,6 +1,0 @@
-{
-  "src_files": [
-    "lib/*.js",
-    "spec/*.spec.js"
-  ]
-}
