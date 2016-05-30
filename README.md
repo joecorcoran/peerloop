@@ -1,4 +1,4 @@
-# Peerloop
+# Peerloop [![Build Status](https://travis-ci.org/joecorcoran/peerloop.svg?branch=storage)](https://travis-ci.org/joecorcoran/peerloop)
 
 Peer-to-peer chat over WebRTC.
 
