@@ -4,6 +4,6 @@
     "lib/spec/*-spec.js"
   ],
   "test_page": "spec/index.mustache",
-  "launch_in_ci": ["firefox"],
+  "launch_in_ci": ["PhantomJS"],
   "launch_in_dev": ["chrome", "firefox"]
 }
