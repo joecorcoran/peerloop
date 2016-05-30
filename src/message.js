@@ -1,5 +1,5 @@
-import hex from 'hex.js';
-import Dexie from 'dexie.js';
+import hex from './hex.js';
+import Dexie from './dexie.js';
 
 let Message = {};
 
