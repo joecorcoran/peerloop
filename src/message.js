@@ -28,15 +28,14 @@ Message.Model = class {
   }
 
   static parse(attrs) {
-    let msg = new Message.Model(attrs.clientUid, attrs.text);
-    msg.uid = attrs.uid;
+    let msg = new Message.Model(attrs.clientUid, attrs.text, attrs.uid);
     return msg;
   }
 
-  constructor(clientUid, text) {
+  constructor(clientUid, text, uid = hex()) {
     this.clientUid = clientUid;
     this.text = text;
-    this.uid = hex();
+    this.uid = uid;
   }
 
   get serialized() {
@@ -48,7 +47,7 @@ Message.Model = class {
   }
 
   equal(record) {
-    return this.fingerprint === record.fingerprint;
+    return this.fingerprint.every((a, i) => a === record.fingerprint[i]);
   }
 };
 
