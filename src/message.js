@@ -52,12 +52,24 @@ Message.Model = class {
 };
 
 Message.Set = class {
-  constructor(messages) {
+  constructor(messages = []) {
     this.messages = messages;
   }
 
+  get length() {
+    return this.messages.length;
+  }
+
+  add(message) {
+    let existing = this.messages.find(a => a.equal(message));
+    if (!existing) this.messages.push(message);
+    return message;
+  }
+
   merge(set) {
-    // return new Set
+    let merged = new Message.Set(this.messages.slice());
+    set.messages.forEach(a => merged.add(a));
+    return merged;
   }
 
   ordered() {

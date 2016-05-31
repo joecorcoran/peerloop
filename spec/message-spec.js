@@ -45,3 +45,35 @@ describe('Message.Model', () => {
     });
   });
 });
+
+describe('Message.Set', () => {
+  describe('add', () => {
+    it('adds message if not already present', () => {
+      let one = new Message.Model('a', 'hello', 'b'),
+          set = new Message.Set();
+      expect(set.length).toEqual(0);
+      set.add(one);
+      expect(set.length).toEqual(1);
+    });
+
+    it('does not add duplicates', () => {
+      let one = new Message.Model('a', 'hello', 'b'),
+          two = new Message.Model('a', 'goodbye', 'b'),
+          set = new Message.Set([one]);
+      expect(set.length).toEqual(1);
+      set.add(two);
+      expect(set.length).toEqual(1);
+    });
+  });
+
+  describe('merge', () => {
+    it('returns a new set containing members of both sets', () => {
+      let one = new Message.Set([new Message.Model('a', 'hello', 'b')]),
+          two = new Message.Set([new Message.Model('x', 'hello', 'b')]),
+          merged = one.merge(two);
+      expect(one === merged).toBe(false);
+      expect(merged instanceof Message.Set).toBe(true);
+      expect(merged.length).toEqual(2);
+    });
+  });
+});
