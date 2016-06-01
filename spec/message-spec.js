@@ -66,14 +66,25 @@ describe('Message.Set', () => {
     });
   });
 
-  describe('merge', () => {
+  describe('union', () => {
     it('returns a new set containing members of both sets', () => {
       let one = new Message.Set([new Message.Model('a', 'hello', 'b')]),
           two = new Message.Set([new Message.Model('x', 'hello', 'b')]),
-          merged = one.merge(two);
+          merged = one.union(two);
       expect(one === merged).toBe(false);
       expect(merged instanceof Message.Set).toBe(true);
       expect(merged.length).toEqual(2);
+    });
+  });
+
+  describe('intersection', () => {
+    it('returns a new set containing only members present in both sets', () => {
+      let one = new Message.Set([(new Message.Model('a', 'hello', 'b')), (new Message.Model('a', 'yo', 'c'))]),
+          two = new Message.Set([(new Message.Model('b', 'bye', 'b')), (new Message.Model('a', 'goodbye', 'b'))]),
+          intersection = one.intersection(two);
+      expect(one === intersection).toBe(false);
+      expect(intersection instanceof Message.Set).toBe(true);
+      expect(intersection.length).toEqual(1);
     });
   });
 });

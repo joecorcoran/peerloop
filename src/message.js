@@ -60,21 +60,31 @@ Message.Set = class {
     return this.messages.length;
   }
 
+  contains(message) {
+    return !!this.messages.find(a => a.equal(message)) ? true : false;
+  }
+
   add(message) {
-    let existing = this.messages.find(a => a.equal(message));
-    if (!existing) this.messages.push(message);
+    if (!this.contains(message)) this.messages.push(message);
     return message;
   }
 
-  merge(set) {
-    let merged = new Message.Set(this.messages.slice());
-    set.messages.forEach(a => merged.add(a));
-    return merged;
+  union(other) {
+    let result = new Message.Set(this.messages.slice());
+    other.messages.forEach(a => result.add(a));
+    return result;
   }
 
-  ordered() {
-    // return array of messages
+  intersection(other) {
+    let result = new Message.Set();
+    this.messages.filter(a => other.contains(a)).forEach(a => result.add(a));
+    other.messages.filter(a => this.contains(a)).forEach(a => result.add(a));
+    return result;
   }
+
+  difference(other) {}
+
+  sym(other) {}
 }
 
 export default Message;
